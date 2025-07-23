@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>لیست کارها</title>
+    <style>
+      * {
+        font-family: sans-serif, Arial, Helvetica;
+      }
+
+      body {
+        background-color: #f4f4f4;
+        color: #000;
+        margin: 0;
+        padding: 0;
+        direction: rtl;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+
+      h2 {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .top-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .add-btn {
+        background-color: #198754;
+        color: white;
+        border: none;
+      }
+
+      .task-list {
+        margin-top: 20px;
+      }
+
+      .task-item {
+        background: white;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .task-item span {
+        font-weight: bold;
+      }
+
+      .task-buttons button {
+        width: auto;
+        margin-left: 5px;
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+
+      .edit-btn {
+        background: gold;
+        border: none;
+      }
+
+      .delete-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+      }
+
+      .theme-btn {
+        width: auto;
+        padding: 7px 12px;
+        background-color: #e9e9e9;
+        border: 1px solid #aaa;
+        cursor: pointer;
+        font-size: 13px;
+      }
+
+      body.dark {
+        background-color: #1f1f1f;
+        color: #f0f0f0;
+      }
+
+      body.dark input,
+      body.dark select {
+        background-color: #333;
+        color: #fff;
+        border: 1px solid #666;
+      }
+
+      body.dark .task-item {
+        background: #2a2a2a;
+        border-color: #444;
+      }
+
+      body.dark .theme-btn {
+        background-color: #444;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="top-controls">
+        <h2>لیـسـت کارهــــــــــــــا</h2>
+        <button class="theme-btn" onclick="toggleTheme()">
+          تغیـیـــر تـــــــــــــم 🌓
+        </button>
+      </div>
+
+      <div class="controls">
+        <input
+          type="text"
+          id="taskInput"
+          placeholder="کـار جدیـد را وارد کنیـــد..."
+        />
+        <select id="categoryInput">
+          <option value="عمومی">عمـومی</option>
+          <option value="کار">کـــار</option>
+          <option value="شخصی">شخـصـی</option>
+          <option value="یادگیری">یادگیـری</option>
+        </select>
+        <button class="add-btn" onclick="addTask()">افزودن</button>
+      </div>
+
+      <div class="controls">
+        <label>فیلتر بر اساس دسته:</label>
+        <select id="filterCategory" onchange="renderTasks()">
+          <option value="همه">همه دسته‌ها</option>
+          <option value="عمومی">عمومی</option>
+          <option value="کار">کار</option>
+          <option value="شخصی">شخصی</option>
+          <option value="یادگیری">یادگیری</option>
+        </select>
+      </div>
+
+      <div class="task-list" id="taskList"></div>
+    </div>
+
+    <script>
+      let tasks = [];
+      let editingIndex = null;
+
+      function addTask() {
+        const taskText = document.getElementById("taskInput").value.trim();
+        const category = document.getElementById("categoryInput").value;
+
+        if (!taskText) return;
+
+        if (editingIndex !== null) {
+          tasks[editingIndex] = { text: taskText, category };
+          editingIndex = null;
+        } else {
+          tasks.push({ text: taskText, category });
+        }
+
+        document.getElementById("taskInput").value = "";
+        document.getElementById("categoryInput").value = "عمومی";
+
+        renderTasks();
+      }
+
+      function renderTasks() {
+        const list = document.getElementById("taskList");
+        list.innerHTML = "";
+
+        const filter = document.getElementById("filterCategory").value;
+
+        tasks.forEach((task, index) => {
+          if (filter !== "همه" && task.category !== filter) return;
+
+          const div = document.createElement("div");
+          div.className = "task-item";
+
+          const span = document.createElement("span");
+          span.textContent = `${task.text} [${task.category}]`;
+
+          const buttons = document.createElement("div");
+          buttons.className = "task-buttons";
+
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "ویرایش";
+          editBtn.className = "edit-btn";
+          editBtn.onclick = () => {
+            document.getElementById("taskInput").value = task.text;
+            document.getElementById("categoryInput").value = task.category;
+            editingIndex = index;
+          };
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "حذف";
+          deleteBtn.className = "delete-btn";
+          deleteBtn.onclick = () => {
+            tasks.splice(index, 1);
+            renderTasks();
+          };
+
+          buttons.appendChild(editBtn);
+          buttons.appendChild(deleteBtn);
+
+          div.appendChild(span);
+          div.appendChild(buttons);
+          list.appendChild(div);
+        });
+      }
+
+      function toggleTheme() {
+        document.body.classList.toggle("dark");
+      }
+    </script>
+  </body>
+</html>
